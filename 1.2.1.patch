@@ -1,0 +1,35 @@
+diff --git a/_includes/codepiano/navigation_list b/_includes/codepiano/navigation_list
+index a47bf6e..c42ec40 100644
+--- a/_includes/codepiano/navigation_list
++++ b/_includes/codepiano/navigation_list
+@@ -1,10 +1,23 @@
+ {% comment %} index.html页面中的导航 {% endcomment %}
+-{% assign color_hack = 'posts timeline categories about' %}
+ {% assign current_nav = page.url | remove:'/' | remove:'.html' %}
+-{% assign color_hack = color_hack | replace:{{current_nav}},'active' %}
+-{% assign color_hack = color_hack | split:' ' %}
++{% capture navigation_entries %}
++{% for nav_page in site.pages %}
++  {% if nav_page.group == group %}
++    {% assign navigation_order = nav_page.navigation_order | default: nav_page.index | default: 9999 %}
++    {% capture navigation_entry %}{{ navigation_order | prepend:'0000' | slice: -4, 4 }}::{{ nav_page.url }}::{{ nav_page.title }}{% endcapture %}
++    {{ navigation_entry }}||
++  {% endif %}
++{% endfor %}
++{% endcapture %}
++{% assign navigation_entries = navigation_entries | split:'||' | sort %}
+ 
+-<li class="{{color_hack[0]}}"><a href="/posts">目录</a></li>
+-<li class="{{color_hack[1]}}"><a href="/timeline">时间线</a></li>
+-<li class="{{color_hack[3]}}"><a href="/about">关于</a></li>
+-<li class="{{color_hack[4]}}"><a href="/link">好基友</a></li>
++{% for navigation_entry in navigation_entries %}
++  {% assign navigation_entry = navigation_entry | strip %}
++  {% unless navigation_entry == '' %}
++    {% assign navigation_item = navigation_entry | split:'::' %}
++    {% assign nav_url = navigation_item[1] | strip %}
++    {% assign nav_name = navigation_item[2] | strip %}
++    {% assign nav_key = nav_url | remove:'/' | remove:'.html' %}
++<li class="{% if nav_key == current_nav %}active{% endif %}"><a href="{{ nav_url }}">{{ nav_name }}</a></li>
++  {% endunless %}
++{% endfor %}
